@@ -1,58 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchMessages } from "../services/chat.service";
-import type { Message } from "../types/chat.types";
 import { POLL_INTERVAL_MS } from "@/config/constants";
 
-interface UseMessagesReturn {
-  messages: Message[];
-  isLoading: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
+// Shared key so the query and mutations reference the same cache entry.
+export const MESSAGES_QUERY_KEY = ["messages"] as const;
 
-export function useMessages(): UseMessagesReturn {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useMessages() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: MESSAGES_QUERY_KEY,
+    queryFn: () => fetchMessages(),
+    refetchInterval: POLL_INTERVAL_MS, // polling, handled by React Query
+  });
 
-  // Tracks IDs we've already rendered so polling doesn't add duplicates. O(1) per message.
-  const knownIds = useRef(new Set<string>());
-
-  const load = useCallback(async () => {
-    try {
-      const incoming = await fetchMessages();
-
-      setMessages((prev) => {
-        const next = [...prev];
-        let changed = false;
-
-        for (const msg of incoming) {
-          if (!knownIds.current.has(msg._id)) {
-            knownIds.current.add(msg._id);
-            next.push(msg);
-            changed = true;
-          }
-        }
-
-        // Returning prev when nothing changed avoids an unnecessary re-render.
-        return changed ? next : prev;
-      });
-
-      setError(null);
-    } catch {
-      setError("Could not load messages. Retrying…");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-    const interval = setInterval(load, POLL_INTERVAL_MS);
-    return () => clearInterval(interval); // cleanup prevents leaks/double-polling
-  }, [load]);
-
-  return { messages, isLoading, error, refetch: load };
+  return {
+    messages: data ?? [],
+    isLoading,
+    error: isError ? "Could not load messages. Retrying…" : null,
+  };
 }
