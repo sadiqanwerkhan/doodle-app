@@ -8,12 +8,6 @@
   --color-chat-author: #b3bcc3;
 }
 
-.chat-surface {
-  background-color: #f0f0f0;
-  background-image: url("/doodle-bg.png");
-  background-repeat: repeat;
-}
-
 html {
   scroll-behavior: smooth;
 }

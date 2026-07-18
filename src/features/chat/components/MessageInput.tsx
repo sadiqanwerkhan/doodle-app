@@ -3,7 +3,7 @@
 import { useRef, useState, KeyboardEvent } from "react";
 
 interface MessageInputProps {
-  onSend: (text: string) => Promise<unknown>;
+  onSend: (text: string) => void;
   isSending: boolean;
 }
 
@@ -12,11 +12,11 @@ export function MessageInput({ onSend, isSending }: MessageInputProps) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = async () => {
+const handleSend = () => {
     const trimmed = value.trim();
     if (!trimmed || isSending) return;
     setValue("");
-    await onSend(trimmed);
+    onSend(trimmed);
     inputRef.current?.focus();
   };
 
