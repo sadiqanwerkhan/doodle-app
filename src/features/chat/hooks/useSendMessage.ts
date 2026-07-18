@@ -13,7 +13,8 @@ interface UseSendMessageReturn {
 
 export function useSendMessage(
   onOptimisticAdd: (msg: Message) => void,
-  onOptimisticRollback: (tempId: string) => void
+  onOptimisticRollback: (tempId: string) => void,
+  onSent: () => Promise<void>
 ): UseSendMessageReturn {
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -23,7 +24,6 @@ export function useSendMessage(
       const trimmed = text.trim();
       if (!trimmed) return null;
 
-      // Show the message instantly with a temp id, before the server confirms.
       const tempId = `temp-${Date.now()}`;
       const optimistic: Message = {
         _id: tempId,
@@ -41,18 +41,19 @@ export function useSendMessage(
           message: trimmed,
           author: CURRENT_USER,
         });
-        // Drop the temp copy; the next poll brings the real one (with its real _id).
-        onOptimisticRollback(tempId);
+        // Pull the server list immediately so the real message shows without waiting for the poll.
+        // ChatPage removes the optimistic twin once the server copy is present.
+        await onSent();
         return confirmed;
       } catch {
-        onOptimisticRollback(tempId); // roll back so we don't show a message that never sent
+        onOptimisticRollback(tempId); // only roll back on failure
         setSendError("Failed to send. Please try again.");
         return null;
       } finally {
         setIsSending(false);
       }
     },
-    [onOptimisticAdd, onOptimisticRollback]
+    [onOptimisticAdd, onOptimisticRollback, onSent]
   );
 
   return { send, isSending, sendError };
