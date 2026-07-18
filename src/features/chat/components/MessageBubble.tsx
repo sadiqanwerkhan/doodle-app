@@ -7,30 +7,31 @@ interface MessageBubbleProps {
   isOwn: boolean;
 }
 
-// Own messages: right-aligned, yellow. Others: left-aligned, white with author name.
+// Spec (from design assets): bubble max-width 640px, 16px inner padding,
+// 24px margin from the opposite screen edge. Own = right/yellow, others = left/white.
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   return (
     <div
-      className={`flex w-full ${isOwn ? "justify-end" : "justify-start"}`}
+      className={`flex w-full ${isOwn ? "justify-end pl-6" : "justify-start pr-6"}`}
       role="listitem"
     >
       <div
-        className={`max-w-[75%] rounded-lg px-4 py-3 shadow-sm ${
+        className={`w-fit max-w-[640px] rounded-lg p-4 shadow-sm ${
           isOwn ? "bg-chat-own-bg" : "bg-chat-other-bg"
         }`}
       >
         {!isOwn && (
-          <p className="mb-1 text-xs font-medium text-gray-400">
+          <p className="mb-1 text-sm font-normal text-chat-author">
             {message.author}
           </p>
         )}
 
-        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800">
+        <p className="whitespace-pre-wrap break-words text-base leading-relaxed text-gray-800">
           {decodeHtmlEntities(message.message)}
         </p>
 
         <p
-          className={`mt-1 text-xs text-gray-400 ${
+          className={`mt-1 text-sm text-gray-400 ${
             isOwn ? "text-right" : "text-left"
           }`}
         >
