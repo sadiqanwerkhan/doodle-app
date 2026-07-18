@@ -8,7 +8,7 @@ interface MessageBubbleProps {
 }
 
 // Spec (from design assets): bubble max-width 640px, 16px inner padding,
-// 24px margin from the opposite screen edge. Own = right/yellow, others = left/white.
+// 24px margin from the opposite screen edge, subtle border, slight corner rounding.
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   return (
     <div
@@ -16,7 +16,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       role="listitem"
     >
       <div
-        className={`w-fit max-w-[640px] rounded-lg p-4 shadow-sm ${
+        className={`w-fit max-w-[640px] rounded-md border border-gray-200 p-4 shadow-sm ${
           isOwn ? "bg-chat-own-bg" : "bg-chat-other-bg"
         }`}
       >
