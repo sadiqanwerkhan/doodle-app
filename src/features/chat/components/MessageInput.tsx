@@ -28,7 +28,7 @@ export function MessageInput({ onSend, isSending }: MessageInputProps) {
   };
 
   return (
-    <div className="flex items-center bg-chat-blue px-3 py-3">
+    <div className="flex items-center gap-2 bg-chat-blue p-2">
       <input
         ref={inputRef}
         type="text"

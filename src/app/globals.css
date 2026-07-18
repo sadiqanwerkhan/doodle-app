@@ -1,10 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-chat-blue: #3b8dc7;
-  --color-chat-send: #e8614f;
-  --color-chat-own-bg: #fefac4;
+  --color-chat-blue: #3798d4;
+  --color-chat-send: #ff876d;
+  --color-chat-own-bg: #fcf6c5;
   --color-chat-other-bg: #ffffff;
+  --color-chat-author: #b3bcc3;
+}
+
+.chat-surface {
+  background-color: #f0f0f0;
+  background-image: url("/doodle-bg.png");
+  background-repeat: repeat;
 }
 
 html {
