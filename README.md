@@ -1,4 +1,4 @@
-# Doodle Chat
+# Doodle Chat App
 
 A responsive chat interface for the Doodle frontend challenge. Built with Next.js and TypeScript, it fetches and sends messages against the provided Chat API.
 
@@ -59,9 +59,9 @@ The point of this split is that the UI never knows *how* messages arrive. Compon
 
 **TanStack Query for the data layer.** Rather than hand-roll fetching, polling, caching, and optimistic updates, the app uses TanStack Query. `useMessages` is a `useQuery` with `refetchInterval` for polling; `useSendMessage` is a `useMutation` with the standard optimistic pattern (`onMutate` writes to the cache, `onError` rolls back from a snapshot, `onSettled` invalidates to resync). This removes a class of bugs — deduplication, cache consistency, and rollback are handled by a well-tested library instead of custom code, and the components stay unaware of how data is fetched.
 
-**Polling for updates.** The provided API is REST-only, so updates come from polling every 5s. This is isolated in the query config — see the scaling note for what production would use instead. Because polling is declared via `refetchInterval`, swapping to a push-based transport later means changing the hook, not the components.
+**Polling for updates.** The provided API is REST-only, so updates come from polling every 5s. This is isolated in the query config, see the scaling note for what production would use instead. Because polling is declared via `refetchInterval`, swapping to a push-based transport later means changing the hook, not the components.
 
-**Optimistic sending.** Sent messages appear instantly via the cache, then reconcile against the server on the next fetch. On failure the cache rolls back to its prior snapshot and an error is shown — so the UI stays responsive without hiding failures. Rollback is snapshot-based, so identical messages sent in quick succession are handled correctly.
+**Optimistic sending.** Sent messages appear instantly via the cache, then reconcile against the server on the next fetch. On failure the cache rolls back to its prior snapshot and an error is shown, so the UI stays responsive without hiding failures. Rollback is snapshot-based, so identical messages sent in quick succession are handled correctly.
 
 **HTML entity decoding.** Some seed data is stored encoded (e.g. `It&#39;s`). A small util decodes it at render time so messages read correctly.
 
@@ -71,14 +71,14 @@ The point of this split is that the UI never knows *how* messages arrive. Compon
 
 ## Scaling this beyond a toy
 
-Polling is fine here but wouldn't survive real scale — every client hits the server on a timer whether or not anything changed. The progression I'd follow:
+Polling is fine here but would not survive real scale, every client hits the server on a timer whether or not anything changed. The progression I would follow:
 
 1. **Server-Sent Events or WebSockets** to replace polling — push instead of pull. SSE suits a mostly-read feed; WebSockets suit bidirectional chat. Either slots behind the existing `useMessages` hook without touching the UI.
 2. **At large scale the protocol is the easy part.** The hard problems are connection fan-out and offline delivery: a pub/sub backbone (Redis/Kafka) so the server holding the sender's connection can route a message to the servers holding the recipients' connections; durable per-user queues so offline users receive messages on reconnect; and sharding conversations across storage by conversation ID. A presence service tracks who's online and where.
 
-I deliberately didn't build any of this — the brief is a 4–6 hour task and over-engineering it would be the wrong signal. The abstraction boundary (transport isolated in one hook) is what makes that evolution cheap.
+I deliberately didn't build any of this because the brief is a 4–6 hour task and over-engineering it would be the wrong signal. The abstraction boundary (transport isolated in one hook) is what makes that evolution cheap.
 
-## What I'd add with more time
+## What I would add with more time
 
 - WebSocket transport behind the existing hook
 - Pagination / infinite scroll upward using the `before` param
